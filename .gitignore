@@ -1,0 +1,10 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/.vs
+/DockerIt.Service.App/.vs/DockerIt.Service.App
+/DockerIt.Service.App/DockerIt.Service/bin/Debug/net5.0
+/DockerIt.Service.App/DockerIt.Service/obj
+/DockerIt.Service.App/DockerIt.Service.Tests/bin/Debug
+/DockerIt.Service.App/DockerIt.Service.Tests/obj

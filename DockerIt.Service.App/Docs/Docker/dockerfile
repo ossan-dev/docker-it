@@ -1,0 +1,30 @@
+# base img for SQL Server 2017 on Linux
+FROM mcr.microsoft.com/mssql/server:2017-latest as build
+
+# install unzip
+RUN apt-get update \
+    && apt-get install unzip -y
+    
+
+# Install SQLPackage for Linux and make it executable
+RUN wget -progress=bar:force -q -O sqlpackage.zip "https://go.microsoft.com/fwlink/?linkid=2157202" \
+    && unzip -qq sqlpackage.zip -d /opt/sqlpackage \
+    && chmod +x /opt/sqlpackage/sqlpackage
+
+# add the bacpac to the img
+WORKDIR /tmp
+COPY WideWorldImporters-Standard.bacpac .
+
+# env variables of SQL Server
+ENV ACCEPT_EULA=Y
+ENV MSSQL_SA_PASSWORD=abcd1234ABCD!
+
+# cmd to run in SQL container
+RUN /opt/mssql/bin/sqlservr --accept-eula & sleep 25 \
+    && /opt/sqlpackage/sqlpackage /Action:Import /SourceFile:"/tmp/WideWorldImporters-Standard.bacpac" /TargetConnectionString:"Data Source=localhost;Initial Catalog=WideWorldImporters;User ID=sa;Password=abcd1234ABCD!" \
+    && pkill sqlservr
+
+# copy the file from the build stage to release state
+FROM mcr.microsoft.com/mssql/server:2017-latest as release
+ENV ACCEPT_EULA=Y
+COPY --from=build /var/opt/mssql/data /var/opt/mssql/data
