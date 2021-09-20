@@ -27,7 +27,7 @@ namespace DockerIt.Service.Tests
             // arrange            
 
             // act
-            var orders = await _orderService.GetAll(page: 1, take: take);
+            var orders = await _orderService.GetAll(page: page, take: take);
 
             // assert            
             Assert.True(orders.Count <= take);
@@ -58,6 +58,50 @@ namespace DockerIt.Service.Tests
 
             // assert            
             Assert.Null(order);
+        }
+
+        [Fact]
+        public async Task Create_Order_Return_One_Rows_Affected()
+        {
+            // arrange
+            var order = new Order()
+            {
+                CustomerID = 1,
+                SalespersonPersonID = 1,
+                ContactPersonID = 1,
+                OrderDate = DateTime.Today,
+                ExpectedDeliveryDate = DateTime.Today.AddDays(3),
+                IsUndersupplyBackordered = false,
+                LastEditedBy = 1
+            };
+
+            // act
+            var affRows = await _orderService.Create(order);
+
+            // assert
+            Assert.Equal(1, affRows);
+        }
+
+        [Fact]
+        public async Task Create_Order_Throws_Exc_When_Info_Are_Missing()
+        {
+            // arrange
+            var order = new Order()
+            {
+                SalespersonPersonID = 1,
+                ContactPersonID = 1,
+                OrderDate = DateTime.Today,
+                ExpectedDeliveryDate = DateTime.Today.AddDays(3),
+                LastEditedBy = 1
+            };
+
+            // act
+
+            // assert
+            await Assert.ThrowsAsync<SqlException>(async () => 
+            {
+                await _orderService.Create(order);
+            });
         }
     }
 }

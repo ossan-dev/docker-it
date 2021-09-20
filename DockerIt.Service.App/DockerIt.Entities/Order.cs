@@ -12,8 +12,13 @@ namespace DockerIt.Entities
         }
 
         public int OrderID { get; set; }
+        public int CustomerID { get; set; }
+        public int SalespersonPersonID { get; set; }
+        public int ContactPersonID { get; set; }
         public DateTime OrderDate { get; set; }
         public DateTime ExpectedDeliveryDate { get; set; }
+        public bool IsUndersupplyBackordered { get; set; }
+        public int LastEditedBy { get; set; }
 
         public ICollection<OrderLine> OrderLines { get; private set; }
     }

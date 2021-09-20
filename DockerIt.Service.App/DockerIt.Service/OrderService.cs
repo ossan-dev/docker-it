@@ -24,7 +24,7 @@ namespace DockerIt.Service
                 {"@RowsToSkip",  (page-1) * take},
                 {"@RowsToTake",  take}
             };
-            
+
             string sql = "SELECT * FROM [Sales].[Orders] ORDER BY [OrderDate] OFFSET @RowsToSkip ROWS FETCH NEXT @rowsToTake ROWS ONLY;";
             var orders = await _dbConnection.QueryAsync<Order>(sql, param: parameters, commandTimeout: 600).ConfigureAwait(false);
             return orders.ToList();
@@ -38,6 +38,11 @@ namespace DockerIt.Service
             return order;
         }
 
-
+        public async Task<int> Create(Order order)
+        {
+            string sql = "INSERT INTO [Sales].[Orders] ([CustomerID], [SalespersonPersonID], [ContactPersonID], [OrderDate], [ExpectedDeliveryDate], [IsUndersupplyBackordered], [LastEditedBy]) VALUES (@CustomerID, @SalespersonPersonID, @ContactPersonID, @OrderDate, @ExpectedDeliveryDate, @IsUndersupplyBackordered, @LastEditedBy)";
+            var affRows = await _dbConnection.ExecuteAsync(sql: sql, new { CustomerId = order.CustomerID, SalespersonPersonID = order.SalespersonPersonID, ContactPersonID = order.ContactPersonID, OrderDate = order.OrderDate, ExpectedDeliveryDate = order.ExpectedDeliveryDate, IsUndersupplyBackordered = order.IsUndersupplyBackordered, LastEditedBy = order.LastEditedBy }).ConfigureAwait(false);
+            return affRows;
+        }
     }
 }
