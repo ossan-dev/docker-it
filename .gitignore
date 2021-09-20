@@ -8,3 +8,6 @@
 /DockerIt.Service.App/DockerIt.Service/obj
 /DockerIt.Service.App/DockerIt.Service.Tests/bin/Debug
 /DockerIt.Service.App/DockerIt.Service.Tests/obj
+/DockerIt.Service.App/DockerIt.Entities/bin/Debug/net5.0
+/DockerIt.Service.App/DockerIt.Entities/obj
+/DockerIt.Service.App/DockerIt.Service.Tests/bin/Release/net5.0
