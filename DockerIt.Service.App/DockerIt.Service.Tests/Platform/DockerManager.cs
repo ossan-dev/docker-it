@@ -57,10 +57,46 @@ namespace DockerIt.Service.Tests.Platform
             return freePort;
         }
 
+        public async Task CleanupRunningContainers(string sqlContainerPrefix)
+        {
+            var runningContainers = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
+
+            foreach (var runningContainer in runningContainers.Where(cont => cont.Names.Any(n => n.Contains(sqlContainerPrefix))))
+            {
+                // stop all containers that are running more than an hour as they probably failed to be removed
+                if (runningContainer.Created < DateTime.Now.AddHours(-1))
+                {
+                    try
+                    {
+                        await EnsureDockerStoppedAndRemovedAsync(runningContainer.ID);
+                    }
+                    catch
+                    {
+                        // ignore failure on try to stop containers
+                    }
+                }
+            }
+        }
+
+        public async Task<int> GetNumOfContainerByName(string containerPrefix)
+        {
+            int numContainers = 0;
+            var runningContainers = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
+            foreach (var container in runningContainers.Where(cont => cont.Names.Any(n => n.Contains(containerPrefix))))
+            {
+                numContainers++;
+            }
+
+            return numContainers;
+        }
+
         public void Dispose()
         {
             if (_dockerClient != null)
-                _dockerClient.Dispose();
+            {
+                CleanupRunningContainers("wwi-db").GetAwaiter().GetResult();
+                _dockerClient.Dispose();            
+            }
         }
 
         public async Task EnsureDockerStoppedAndRemovedAsync(string dockerContainerId)
@@ -70,6 +106,7 @@ namespace DockerIt.Service.Tests.Platform
         }
 
         #region private methods
+
         private async Task WaitUntilDatabaseAvailableAsync(string databasePort)
         {
             var start = DateTime.UtcNow;
@@ -97,27 +134,6 @@ namespace DockerIt.Service.Tests.Platform
             }
 
             return;
-        }
-
-        private async Task CleanupRunningContainers(string sqlContainerPrefix)
-        {
-            var runningContainers = await _dockerClient.Containers.ListContainersAsync(new ContainersListParameters());
-
-            foreach (var runningContainer in runningContainers.Where(cont => cont.Names.Any(n => n.Contains(sqlContainerPrefix))))
-            {
-                // stop all containers that are running more than an hour as they probably failed to be removed
-                if (runningContainer.Created < DateTime.Now.AddHours(-1))
-                {
-                    try
-                    {
-                        await EnsureDockerStoppedAndRemovedAsync(runningContainer.ID);
-                    }
-                    catch
-                    {
-                        // ignore failure on try to stop containers
-                    }
-                }
-            }
         }
 
         private string GetFreePort()
