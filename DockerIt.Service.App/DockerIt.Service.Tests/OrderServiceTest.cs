@@ -11,24 +11,53 @@ namespace DockerIt.Service.Tests
     public class OrderServiceTest : IClassFixture<DatabaseFixture>
     {
         private readonly DatabaseFixture _databaseFixture;
-        private readonly IDbConnection _connection;
+        private readonly IOrderService _orderService;
         public OrderServiceTest(DatabaseFixture databaseFixture)
         {
             _databaseFixture = databaseFixture;
-            _connection = new SqlConnection($"Data Source=localhost,{_databaseFixture.SqlPort};Initial Catalog=WideWorldImporters;Integrated Security=False;User ID=sa;Password=abcd1234ABCD!");
+            _orderService = new OrderService(new SqlConnection($"Data Source=localhost,{_databaseFixture.SqlPort};Initial Catalog=WideWorldImporters;Integrated Security=False;User ID=sa;Password=abcd1234ABCD!"));
         }
 
-        [Fact]
-        public async Task Test1()
+        [Theory]
+        [InlineData(1, 10)]
+        [InlineData(2, 15)]
+        [InlineData(500, 15)]
+        public async Task GetAll_Returns_Exact_Rows_Num(int page, int take)
         {
-            // arrange
-            var orderService = new OrderService(_connection);
+            // arrange            
 
             // act
-            var orders = await orderService.GetOrders();
+            var orders = await _orderService.GetAll(page: 1, take: take);
 
-            // assert
-            Assert.Equal(10, orders.Count);
+            // assert            
+            Assert.True(orders.Count <= take);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2000)]
+        public async Task GetById_Returns_Exact_Row(int orderId)
+        {
+            // arrange
+
+            // act
+            var order = await _orderService.GetbyId(orderId);
+
+            // assert            
+            Assert.Equal(orderId, order.OrderID);
+        }
+
+        [Theory]
+        [InlineData(100000)]
+        public async Task GetById_Returns_Null_When_Not_Found(int orderId)
+        {
+            // arrange
+
+            // act
+            var order = await _orderService.GetbyId(orderId);
+
+            // assert            
+            Assert.Null(order);
         }
     }
 }

@@ -12,17 +12,32 @@ namespace DockerIt.Service
     {
         private readonly IDbConnection _dbConnection;
 
-        // TODO: CRUD
         public OrderService(IDbConnection dbConnection)
         {
             _dbConnection = dbConnection;
         }
 
-        public async Task<ICollection<Order>> GetOrders()
+        public async Task<ICollection<Order>> GetAll(int page = 1, int take = 10)
         {
-            string sql = "SELECT TOP 10 * FROM [Sales].[Orders]";
-            var orders = await _dbConnection.QueryAsync<Order>(sql, commandTimeout: 600).ConfigureAwait(false);
+            var parameters = new Dictionary<string, object>()
+            {
+                {"@RowsToSkip",  (page-1) * take},
+                {"@RowsToTake",  take}
+            };
+            
+            string sql = "SELECT * FROM [Sales].[Orders] ORDER BY [OrderDate] OFFSET @RowsToSkip ROWS FETCH NEXT @rowsToTake ROWS ONLY;";
+            var orders = await _dbConnection.QueryAsync<Order>(sql, param: parameters, commandTimeout: 600).ConfigureAwait(false);
             return orders.ToList();
         }
+
+        public async Task<Order> GetbyId(int id)
+        {
+            var parameters = new { OrderId = id };
+            string sql = "SELECT * FROM [Sales].[Orders] WHERE OrderId = @OrderId";
+            var order = await _dbConnection.QuerySingleOrDefaultAsync<Order>(sql: sql, param: parameters, commandTimeout: 600).ConfigureAwait(false);
+            return order;
+        }
+
+
     }
 }
