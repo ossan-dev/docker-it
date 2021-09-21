@@ -26,7 +26,7 @@ namespace DockerIt.Service
             };
 
             string sql = "SELECT * FROM [Sales].[Orders] ORDER BY [OrderDate] OFFSET @RowsToSkip ROWS FETCH NEXT @rowsToTake ROWS ONLY;";
-            var orders = await _dbConnection.QueryAsync<Order>(sql, param: parameters, commandTimeout: 600).ConfigureAwait(false);
+            var orders = await _dbConnection.QueryAsync<Order>(sql, param: parameters, commandTimeout: 900).ConfigureAwait(false);
             return orders.ToList();
         }
 
@@ -34,7 +34,7 @@ namespace DockerIt.Service
         {
             var parameters = new { OrderId = id };
             string sql = "SELECT * FROM [Sales].[Orders] WHERE OrderId = @OrderId";
-            var order = await _dbConnection.QuerySingleOrDefaultAsync<Order>(sql: sql, param: parameters, commandTimeout: 600).ConfigureAwait(false);
+            var order = await _dbConnection.QuerySingleOrDefaultAsync<Order>(sql: sql, param: parameters, commandTimeout: 900).ConfigureAwait(false);
             return order;
         }
 
@@ -42,6 +42,19 @@ namespace DockerIt.Service
         {
             string sql = "INSERT INTO [Sales].[Orders] ([CustomerID], [SalespersonPersonID], [ContactPersonID], [OrderDate], [ExpectedDeliveryDate], [IsUndersupplyBackordered], [LastEditedBy]) VALUES (@CustomerID, @SalespersonPersonID, @ContactPersonID, @OrderDate, @ExpectedDeliveryDate, @IsUndersupplyBackordered, @LastEditedBy)";
             var affRows = await _dbConnection.ExecuteAsync(sql: sql, new { CustomerId = order.CustomerID, SalespersonPersonID = order.SalespersonPersonID, ContactPersonID = order.ContactPersonID, OrderDate = order.OrderDate, ExpectedDeliveryDate = order.ExpectedDeliveryDate, IsUndersupplyBackordered = order.IsUndersupplyBackordered, LastEditedBy = order.LastEditedBy }).ConfigureAwait(false);
+            return affRows;
+        }
+        
+        public async Task<int> Update(Order order)
+        {
+            string sql = @"
+                        UPDATE [Sales].[Orders] 
+                            SET [CustomerID] = @CustomerId,
+                                [SalespersonPersonID] = @SalespersonPersonID,                         [ContactPersonID] = @ContactPersonID,
+                                [OrderDate] = @OrderDate,
+                                [ExpectedDeliveryDate] = @ExpectedDeliveryDate,                       [IsUndersupplyBackordered] = @IsUndersupplyBackordered,               [LastEditedBy] = @LastEditedBy
+                                WHERE OrderID = @OrderID";
+            var affRows = await _dbConnection.ExecuteAsync(sql: sql, order).ConfigureAwait(false);
             return affRows;
         }
     }

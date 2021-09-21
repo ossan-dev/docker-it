@@ -9,5 +9,6 @@ namespace DockerIt.Service
         Task<int> Create(Order order);
         Task<ICollection<Order>> GetAll(int page = 0, int take = 10);
         Task<Order> GetbyId(int id);
+        Task<int> Update(Order order);
     }
 }

@@ -103,5 +103,31 @@ namespace DockerIt.Service.Tests
                 await _orderService.Create(order);
             });
         }
+
+        [Fact]
+        public async Task Update_Order_Must_Set_Correct_Values()
+        {
+            // arrange
+            var order = new Order()
+            {
+                OrderID = 1,
+                CustomerID = 2,
+                IsUndersupplyBackordered = true,
+                SalespersonPersonID = 1,
+                ContactPersonID = 1,
+                OrderDate = DateTime.Today.AddDays(-10),
+                ExpectedDeliveryDate = DateTime.Today.AddDays(3),
+                LastEditedBy = 1
+            };
+
+            // act
+            var affRows = await _orderService.Update(order);
+
+            // assert
+            var updatedOrder = await _orderService.GetbyId(order.OrderID);
+            Assert.Equal(1, affRows);
+            Assert.Equal(order.CustomerID, updatedOrder.CustomerID);
+            Assert.Equal(order.OrderDate, updatedOrder.OrderDate);
+        }
     }
 }
