@@ -129,5 +129,33 @@ namespace DockerIt.Service.Tests
             Assert.Equal(order.CustomerID, updatedOrder.CustomerID);
             Assert.Equal(order.OrderDate, updatedOrder.OrderDate);
         }
+
+        [Fact]
+        public async Task Delete_Order_Must_Remove_From_Db()
+        {
+            // arrange
+            int id = 4000;
+
+            // act
+            var affRows = await _orderService.Delete(id);
+
+            // assert
+            var deletedOrder = await _orderService.GetbyId(id);
+            Assert.Equal(1, affRows);
+            Assert.Null(deletedOrder);
+        }
+        
+        [Fact]
+        public async Task Delete_Not_Existing_Order_Must_Affect_Zero_Rows()
+        {
+            // arrange
+            int id = 100000;
+
+            // act
+            var affRows = await _orderService.Delete(id);
+
+            // assert
+            Assert.Equal(0, affRows);
+        }
     }
 }
