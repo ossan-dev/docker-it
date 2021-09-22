@@ -57,5 +57,13 @@ namespace DockerIt.Service
             var affRows = await _dbConnection.ExecuteAsync(sql: sql, order).ConfigureAwait(false);
             return affRows;
         }
+
+        public async Task<int> Delete(int id)
+        {
+            // TODO: apply the on delete cascade on FK constraint of Orders table
+            string sql = "DELETE FROM [Sales].[Orders] WHERE OrderID = @OrderID";
+            var affRows = await _dbConnection.ExecuteAsync(sql, new { OrderID = id }).ConfigureAwait(false);
+            return affRows;
+        }
     }
 }
