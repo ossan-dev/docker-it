@@ -110,7 +110,7 @@ namespace DockerIt.Service.Tests.Platform
         private async Task WaitUntilDatabaseAvailableAsync(string databasePort)
         {
             var start = DateTime.UtcNow;
-            const int maxWaitTimeSeconds = 60;
+            const int maxWaitTimeSeconds = 90;
             var connectionEstablished = false;
             while (!connectionEstablished && start.AddSeconds(maxWaitTimeSeconds) > DateTime.UtcNow)
             {
@@ -130,7 +130,7 @@ namespace DockerIt.Service.Tests.Platform
 
             if (!connectionEstablished)
             {
-                throw new Exception("Connection to the SQL docker host could not be established within 60 seconds");
+                throw new Exception("Connection to the SQL docker host could not be established within 90 seconds");
             }
 
             return;
