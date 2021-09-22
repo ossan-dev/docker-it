@@ -29,7 +29,8 @@ namespace DockerIt.Service.Tests
         {
             if(await _dockerManager.GetNumOfContainerByName("wwi-db") > 0)
             {
-                SqlPort = "57265";
+                // TODO: get the listening port of the active SQL container
+                SqlPort = "55688";
                 return false;
             }
             return true;
